@@ -1,3 +1,4 @@
+
 window.addEventListener('DOMContentLoaded', () => {
    // =================TABS===============
    const tabs = document.querySelectorAll('.tabheader__item'),
@@ -181,12 +182,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
       render() {
          const element = document.createElement('div');
-         if(this.classes.length === 0){
+         if (this.classes.length === 0) {
             this.element = 'menu__item';
             element.classList.add(this.element)
-         }else {
-           this.classes.forEach(className => element.classList.add(className));//перебираем масив classes находим каждый элемент className  и добавляем его(это классы) в element  
-         }         
+         } else {
+            this.classes.forEach(className => element.classList.add(className));//перебираем масив classes находим каждый элемент className  и добавляем его(это классы) в element  
+         }
          element.innerHTML = `
                <img src=${this.src} alt=${this.alt}>
                <h3 class="menu__item-subtitle">Меню ${this.title}</h3>
@@ -199,30 +200,84 @@ window.addEventListener('DOMContentLoaded', () => {
       }
    }
    new MenuCard(//сюда передаем аргументы с кода html
-   "img/tabs/vegy.jpg",//передавать в ""
-   "vegy",
-   "Меню 'Фитнес'",
-   "Меню 'Фитнес' - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!",
-   10,
-   '.menu .container'//родительский селектор
+      "img/tabs/vegy.jpg",//передавать в ""
+      "vegy",
+      "Меню 'Фитнес'",
+      "Меню 'Фитнес' - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!",
+      10,
+      '.menu .container'//родительский селектор
    ).render();//такая запись без const div= ТОже верна, она вызоветсятолбк в конструкторе потом удалится таккак нет ссылок на нее больше
 
    new MenuCard(//сюда передаем аргументы с кода html
-   "img/tabs/post.jpg"  ,//передавать в ""
-   "post",
-   'Меню "Постное"',
-   'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
-   7,
-   '.menu .container'//родительский селектор
+      "img/tabs/post.jpg",//передавать в ""
+      "post",
+      'Меню "Постное"',
+      'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
+      7,
+      '.menu .container'//родительский селектор
    ).render();
    new MenuCard(//сюда передаем аргументы с кода html
-   "img/tabs/elite.jpg",//передавать в ""
-   "elite",
-   'Меню “Премиум”',
-'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
-   9,
-   '.menu .container'//родительский селектор
+      "img/tabs/elite.jpg",//передавать в ""
+      "elite",
+      'Меню “Премиум”',
+      'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
+      9,
+      '.menu .container'//родительский селектор
    ).render();
-   
+
+
+   // ========================form
+   const forms = document.querySelectorAll('form');
+   const message = {//формируем обьект в котором будут содержатся ответы статуса для клиентов
+      loading: 'загрузка',
+      success: 'скоро мы  с вами свяжемся',
+      failure: 'чтото пошло не так'
+   };
+   //будет переберать все form и навешивать на них функцию    
+
+   forms.forEach(item => {
+      postData(item);
+   });
+   function postData(form) {
+      form.addEventListener('submit', (e) => {//событие  submit есть у всех кнопок по умолчанию
+         e.preventDefault();//перезагрузка это стандартное поведение браузера обязательно отменить
+
+         const statusMessage = document.createElement('div');//создаем элемент див
+         statusMessage.classList.add('status');//даем ему  класс  стилей, создатьв css
+         statusMessage.textContent = message.loading;//в этот див добавится контенет из loading
+         form.append(statusMessage);//ввсе это добавится в form
+
+         const request = new XMLHttpRequest();
+         request.open('POST', 'server.php'); //нстраиваем запрос
+
+         // request.setRequestHeader('Content-type', 'multipart/form-data'); //заголовки для сервира , что бы он понимал что приходит
+         request.setRequestHeader('Content-type', 'application/json'); //если хотим в формате json
+         const formData = new FormData(form); //формироватся данные для сервира
+         // FormData это спецефический обьект мы не можем просто перевести в другой формат, дляэтого нужно еего прогнать через forEach и поместитьэти данные в обьект
+
+         const obj = {};
+         //пепебирам FormData и все заначения присваевиаем  ключам в obj
+         formData.forEach(function (value, key) {
+            obj[key] = value;
+         });
+         // на обычном обьекте мы можем осушествитьконвертацию  JSON
+         const json = JSON.stringify(obj);//создаем промежуточную переменную куда помешаем приведеные в нужный формат данные
+
+         request.send(json);//отправляем данные
+
+         request.addEventListener('load', () => {//отслеживаем конечную загрузку запроса
+            if (request.status === 200) {//если статус выполнения успешин
+               console.log(request.response);
+               statusMessage.textContent = message.success;// statusMessage это дом-узел он сушествуем, мы его просто модифицируем чтобы ввыводил другую инфу
+               form.reset(); //очешаем форму после ответа
+               setTimeout(() => {//очищаем сообшенеи которое вызвали
+                  statusMessage.remove();
+               }, 2000);//через 2 сек
+            } else {
+               statusMessage.textContent = message.failure;
+            }
+         });
+      });
+   }
 });
 
