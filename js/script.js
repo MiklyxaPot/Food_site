@@ -114,7 +114,7 @@ window.addEventListener('DOMContentLoaded', () => {
    //    })
    const modalTrigger = document.querySelectorAll('[data-modal]');
    const modal = document.querySelector('.modal');
-   const modalClose = document.querySelector('[data-close]');
+
 
    function openModal() {
       modal.classList.add('show');
@@ -135,10 +135,9 @@ window.addEventListener('DOMContentLoaded', () => {
       document.body.style.overflow = '';
    }
 
-   modalClose.addEventListener('click', closeModal);
 
    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {//когдапользователь кликнулна обвертку окна, но не само окно , то выполняется условие
+      if (e.target === modal || e.target.getAttribute('data-close')== '') {//когдапользователь кликнулна обвертку окна, но не само окно , то выполняется условие
          closeModal();
       }
    })
@@ -278,6 +277,23 @@ window.addEventListener('DOMContentLoaded', () => {
             }
          });
       });
+   }
+
+   function showThanksModal(message){
+      const prevModalDialog = document.querySelector('.modal__dialog');
+
+      prevModalDialog.classList.add('hide');//скрываем окно
+      openModal();
+
+      const thanksModal = document.createElement('div');
+      thanksModal.classList.add('modal__dialog');
+      thanksModal.innerHTML = `
+      <div class="modal__content">
+         <div class="modal__close" data-close>×</div>
+         <div class="modal__title">${message}</div>
+      </div>
+      `;
+      document.querySelector('.modal').append(thanksModal);//обращаемся к модал и помешаем туда методом append thanksModal
    }
 });
 
