@@ -148,7 +148,7 @@ window.addEventListener('DOMContentLoaded', () => {
       }
    });
 
-   const modalTimeId = setTimeout(openModal, 3000);
+   const modalTimeId = setTimeout(openModal, 50000);
 
    function showModalByScroll() {
       if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
@@ -228,7 +228,7 @@ window.addEventListener('DOMContentLoaded', () => {
    // ========================form
    const forms = document.querySelectorAll('form');
    const message = {//формируем обьект в котором будут содержатся ответы статуса для клиентов
-      loading: 'загрузка',
+      loading: 'img/form/spinner.svg',
       success: 'скоро мы  с вами свяжемся',
       failure: 'чтото пошло не так'
    };
@@ -241,10 +241,15 @@ window.addEventListener('DOMContentLoaded', () => {
       form.addEventListener('submit', (e) => {//событие  submit есть у всех кнопок по умолчанию
          e.preventDefault();//перезагрузка это стандартное поведение браузера обязательно отменить
 
-         const statusMessage = document.createElement('div');//создаем элемент див
-         statusMessage.classList.add('status');//даем ему  класс  стилей, создатьв css
-         statusMessage.textContent = message.loading;//в этот див добавится контенет из loading
-         form.append(statusMessage);//ввсе это добавится в form
+         const statusMessage = document.createElement('img');//создаем элемент img и подставляем его ниже
+         statusMessage.src = message.loading;
+         statusMessage.style.cssText = `
+            display: block;
+            margin: 0 auto;
+         `;//назначаем стиль спинеру
+         // form.append(statusMessage);//ввсе это добавится в form
+         form.insertAdjacentElement('afterend', statusMessage);//в отличие от append спинер дабавляется помсле запроса не дамая верстку.
+         // блок со спинером доваиляется не в тото жеблок где и запрос а после него
 
          const request = new XMLHttpRequest();
          request.open('POST', 'server.php'); //нстраиваем запрос
@@ -267,13 +272,11 @@ window.addEventListener('DOMContentLoaded', () => {
          request.addEventListener('load', () => {//отслеживаем конечную загрузку запроса
             if (request.status === 200) {//если статус выполнения успешин
                console.log(request.response);
-               statusMessage.textContent = message.success;// statusMessage это дом-узел он сушествуем, мы его просто модифицируем чтобы ввыводил другую инфу
+               showThanksModal(message.success);
                form.reset(); //очешаем форму после ответа
-               setTimeout(() => {//очищаем сообшенеи которое вызвали
                   statusMessage.remove();
-               }, 2000);//через 2 сек
             } else {
-               statusMessage.textContent = message.failure;
+               showThanksModal(message.failure);
             }
          });
       });
@@ -294,6 +297,13 @@ window.addEventListener('DOMContentLoaded', () => {
       </div>
       `;
       document.querySelector('.modal').append(thanksModal);//обращаемся к модал и помешаем туда методом append thanksModal
+      // после того как отправил форму нужно удалить созданое окно чтобы не наполнялся блоками 
+      setTimeout(() => {
+         thanksModal.remove();
+         prevModalDialog.classList.add('show');
+         prevModalDialog.classList.remove('hide');
+         closeModal();
+      },4000);
    }
 });
 
