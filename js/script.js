@@ -137,7 +137,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
    modal.addEventListener('click', (e) => {
-      if (e.target === modal || e.target.getAttribute('data-close')== '') {//когдапользователь кликнулна обвертку окна, но не само окно , то выполняется условие
+      if (e.target === modal || e.target.getAttribute('data-close') == '') {//когдапользователь кликнулна обвертку окна, но не само окно , то выполняется условие
          closeModal();
       }
    })
@@ -249,14 +249,16 @@ window.addEventListener('DOMContentLoaded', () => {
          `;//назначаем стиль спинеру
          // form.append(statusMessage);//ввсе это добавится в form
          form.insertAdjacentElement('afterend', statusMessage);//в отличие от append спинер дабавляется помсле запроса не дамая верстку.
-         // блок со спинером доваиляется не в тото жеблок где и запрос а после него
+         // блок со спинером доваиляется не в тото же блок где и запрос а после него
 
-         const request = new XMLHttpRequest();
-         request.open('POST', 'server.php'); //нстраиваем запрос
+            // ======================запрос и ответ на сервер===================
+
+         // const request = new XMLHttpRequest();
+         // request.open('POST', 'server.php'); //нстраиваем запрос
 
          // request.setRequestHeader('Content-type', 'multipart/form-data'); //заголовки для сервира , что бы он понимал что приходит
-         request.setRequestHeader('Content-type', 'application/json'); //если хотим в формате json
-         const formData = new FormData(form); //формироватся данные для сервира
+         // request.setRequestHeader('Content-type', 'application/json'); //если хотим в формате json
+          const formData = new FormData(form); //формироватся данные для сервира
          // FormData это спецефический обьект мы не можем просто перевести в другой формат, дляэтого нужно еего прогнать через forEach и поместитьэти данные в обьект
 
          const obj = {};
@@ -265,24 +267,44 @@ window.addEventListener('DOMContentLoaded', () => {
             obj[key] = value;
          });
          // на обычном обьекте мы можем осушествитьконвертацию  JSON
-         const json = JSON.stringify(obj);//создаем промежуточную переменную куда помешаем приведеные в нужный формат данные
+         // const json = JSON.stringify(obj);//создаем промежуточную переменную куда помешаем приведеные в нужный формат данных json
 
-         request.send(json);//отправляем данные
+         // request.send(json);//отправляем данные
 
-         request.addEventListener('load', () => {//отслеживаем конечную загрузку запроса
-            if (request.status === 200) {//если статус выполнения успешин
-               console.log(request.response);
+              // запрос с помощью fetch
+              fetch('server.php', {
+               method: "POST",
+               headers: {
+                  'Content-type': 'application/json'
+               },
+               body: JSON.stringify(obj) //вместо formData, сокрощаем код
+            }).then(data => data.text())//приврашает ответ в обычный текст
+            .then(data => {//обрабатываем запрос с помошью Promisa 
+               console.log(data);//data это полученые данные
                showThanksModal(message.success);
-               form.reset(); //очешаем форму после ответа
-                  statusMessage.remove();
-            } else {
+               statusMessage.remove();
+            }).catch(() =>{//если возникла ошибка
                showThanksModal(message.failure);
-            }
-         });
+            }).finally(() => {//всегда в конце промиса, не зависимо успешно или нет
+               form.reset(); //очешаем форму после ответа
+            });
+
+// ----------------обработка запроса
+         // request.addEventListener('load', () => {//отслеживаем конечную загрузку запроса
+         //    if (request.status === 200) {//если статус выполнения успешин
+         //       console.log(request.response);
+         //       showThanksModal(message.success);
+         //       form.reset(); //очешаем форму после ответа
+         //       statusMessage.remove();
+         //    } else {
+         //       showThanksModal(message.failure);
+         //    }
+         // });
+// --------------------
       });
    }
 
-   function showThanksModal(message){
+   function showThanksModal(message) {
       const prevModalDialog = document.querySelector('.modal__dialog');
 
       prevModalDialog.classList.add('hide');//скрываем окно
@@ -303,7 +325,17 @@ window.addEventListener('DOMContentLoaded', () => {
          prevModalDialog.classList.add('show');
          prevModalDialog.classList.remove('hide');
          closeModal();
-      },4000);
+      }, 4000);
    }
+ 
+   // fetch('https://jsonplaceholder.typicode.com/posts', {
+   //    method:"POST",
+   //    body: JSON.stringify({name: 'Alex'}),
+   //    headers: {
+   //       'content-type': 'application/json'
+   //    }
+   // } )
+   //    .then(response => response.json())
+   //    .then(json => console.log(json));
 });
 
